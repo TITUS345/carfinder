@@ -6,7 +6,7 @@ import Button from "@mui/material/Button";
 
 interface SearchBarProps {
     onSearch: (filters: SearchFilters) => void;
-    onSortChange: (sortBy: string) => void;
+    onSortChange: (sortBy: string) => void; // Callback to update sort criteria
     toggleTheme: () => void;
     theme: string; // Light or dark mode
     showFilters: boolean; // Tracks visibility of filters
@@ -27,8 +27,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
         maxPrice: undefined,
         fuelType: undefined,
     });
+    const [sortCriteria, setSortCriteria] = useState<string>(""); // Local state for sorting
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleInputChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
         const { name, value } = e.target;
         setFilters({ ...filters, [name]: value });
     };
@@ -37,11 +40,18 @@ const SearchBar: React.FC<SearchBarProps> = ({
         onSearch(filters);
     };
 
+    const handleSortChange = (e: React.ChangeEvent<{ value: unknown }>) => {
+        const selectedSort = e.target.value as string;
+        setSortCriteria(selectedSort); // Update local sorting state
+        onSortChange(selectedSort); // Pass sorting criteria to parent
+    };
+
     return (
         <div
             className={`p-4 rounded-md shadow-md ${theme === "dark" ? "bg-gray-800 text-white" : "bg-gray-100 text-gray-900"
                 }`}
         >
+            {/* Show/Hide Filters Button */}
             <Button
                 variant="contained"
                 color="primary"
@@ -51,6 +61,30 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 {showFilters ? "Hide Filters" : "Show Filters"}
             </Button>
 
+            {/* Sorting Dropdown */}
+            <TextField
+                select
+                label="Sort Wishlist"
+                value={sortCriteria}
+                onChange={handleSortChange}
+                variant="outlined"
+                className="w-full md:w-1/7 mb-4"
+                SelectProps={{
+                    style: theme === "dark"
+                        ? { color: "white", backgroundColor: "#333" }
+                        : {},
+                }}
+                InputLabelProps={{
+                    style: theme === "dark" ? { color: "white" } : {},
+                }}
+            >
+                <MenuItem value="">None</MenuItem>
+                <MenuItem value="price">Price</MenuItem>
+                <MenuItem value="brand">Brand</MenuItem>
+                <MenuItem value="seatingCapacity">Seating Capacity</MenuItem>
+            </TextField>
+
+            {/* Filters Section */}
             {showFilters && (
                 <div className="flex flex-wrap gap-4 items-center">
                     {/* Filter: Brand */}
@@ -62,10 +96,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
                         onChange={handleInputChange}
                         className="w-full md:w-1/8"
                         InputProps={{
-                            style: theme === "dark" ? { color: "white", backgroundColor: "#333" } : {},
+                            style: theme === "dark"
+                                ? { color: "white", backgroundColor: "#333" }
+                                : {},
                         }}
                         InputLabelProps={{
-                            style: theme === "dark" ? { color: "white" } : {}, // Style label
+                            style: theme === "dark" ? { color: "white" } : {},
                         }}
                     />
 
@@ -79,7 +115,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
                         onChange={handleInputChange}
                         className="w-full md:w-1/8"
                         InputProps={{
-                            style: theme === "dark" ? { color: "white", backgroundColor: "#333" } : {},
+                            style: theme === "dark"
+                                ? { color: "white", backgroundColor: "#333" }
+                                : {},
                         }}
                         InputLabelProps={{
                             style: theme === "dark" ? { color: "white" } : {},
@@ -96,7 +134,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
                         onChange={handleInputChange}
                         className="w-full md:w-1/8"
                         InputProps={{
-                            style: theme === "dark" ? { color: "white", backgroundColor: "#333" } : {},
+                            style: theme === "dark"
+                                ? { color: "white", backgroundColor: "#333" }
+                                : {},
                         }}
                         InputLabelProps={{
                             style: theme === "dark" ? { color: "white" } : {},
@@ -113,7 +153,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
                         variant="outlined"
                         className="w-full md:w-1/7"
                         SelectProps={{
-                            style: theme === "dark" ? { color: "white", backgroundColor: "#333" } : {},
+                            style: theme === "dark"
+                                ? { color: "white", backgroundColor: "#333" }
+                                : {},
                         }}
                         InputLabelProps={{
                             style: theme === "dark" ? { color: "white" } : {},

@@ -10,16 +10,17 @@ import Pagination from "@mui/material/Pagination";
 const HomePage: React.FC = () => {
   const [carList, setCarList] = useState<Car[]>([]);
   const [wishlist, setWishlist] = useState<Car[]>([]);
-  const [wishlistSearch, setWishlistSearch] = useState<string>("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [wishlistPage, setWishlistPage] = useState(1);
-  const [sortBy, setSortBy] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
-  const [theme, setTheme] = useState<string>("light");
+  const [wishlistSearch, setWishlistSearch] = useState<string>(""); // For filtering wishlist
+  const [currentPage, setCurrentPage] = useState(1); // Pagination for search results
+  const [wishlistPage, setWishlistPage] = useState(1); // Pagination for wishlist
+  const [sortBy, setSortBy] = useState<string>(""); // Sorting criteria
+  const [isLoading, setIsLoading] = useState(false); // Loading state for search
+  const [showFilters, setShowFilters] = useState(false); // Visibility of filters
+  const [theme, setTheme] = useState<string>("light"); // Light/Dark mode
   const carsPerPage = 5;
   const carsPerWishlistPage = 10;
 
+  // Load saved wishlist and theme on component mount
   useEffect(() => {
     const savedWishlist = localStorage.getItem("wishlist");
     if (savedWishlist) {
@@ -31,37 +32,42 @@ const HomePage: React.FC = () => {
     }
   }, []);
 
+  // Save wishlist to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("wishlist", JSON.stringify(wishlist));
   }, [wishlist]);
 
+  // Save theme preference to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
   const handleSearch = async (filters: SearchFilters) => {
-    setIsLoading(true);
+    setIsLoading(true); // Show loading spinner
     try {
-      const queryString = new URLSearchParams(filters as any).toString();
+      const queryString = new URLSearchParams(
+        filters as unknown as Record<string, string> // Converting filters to query string
+      ).toString();
       const response = await fetch(`/api/cars?${queryString}`);
       const data = await response.json();
-      setCarList(data);
-      setCurrentPage(1);
+      setCarList(data); // Set search results
+      setCurrentPage(1); // Reset pagination
     } catch (error) {
       console.error("Failed to fetch cars:", error);
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Hide loading spinner
     }
   };
 
   const toggleWishlist = (car: Car) => {
     if (wishlist.some((item) => item.id === car.id)) {
-      setWishlist(wishlist.filter((item) => item.id !== car.id));
+      setWishlist(wishlist.filter((item) => item.id !== car.id)); // Remove from wishlist
     } else {
-      setWishlist([...wishlist, car]);
+      setWishlist([...wishlist, car]); // Add to wishlist
     }
   };
 
+  // Sorting logic based on the selected criteria
   const sortedWishlist = [...wishlist].sort((a, b) => {
     switch (sortBy) {
       case "price":
@@ -76,7 +82,7 @@ const HomePage: React.FC = () => {
   });
 
   const filteredWishlist = sortedWishlist.filter((car: Car) =>
-    car.brand.toLowerCase().includes(wishlistSearch.toLowerCase())
+    car.brand.toLowerCase().includes(wishlistSearch.toLowerCase()) // Filter based on search input
   );
 
   const indexOfLastWishlistCar = wishlistPage * carsPerWishlistPage;
@@ -91,22 +97,29 @@ const HomePage: React.FC = () => {
   const currentCars = carList.slice(indexOfFirstCar, indexOfLastCar);
 
   const handlePageChange = (event: React.ChangeEvent<unknown>, page: number) => {
-    setCurrentPage(page);
+    setCurrentPage(page); // Update current page for search results
   };
 
-  const handleWishlistPageChange = (event: React.ChangeEvent<unknown>, page: number) => {
-    setWishlistPage(page);
+  const handleWishlistPageChange = (
+    event: React.ChangeEvent<unknown>,
+    page: number
+  ) => {
+    setWishlistPage(page); // Update current page for wishlist
   };
 
   const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
+    setTheme(theme === "light" ? "dark" : "light"); // Toggle light/dark mode
   };
 
   return (
-    <div className={`p-4 ${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-gray-900"}`}>
+    <div
+      className={`p-4 ${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-gray-900"
+        }`}
+    >
+      {/* Search Bar */}
       <SearchBar
         onSearch={handleSearch}
-        onSortChange={setSortBy}
+        onSortChange={setSortBy} // Pass sorting state updater function
         toggleTheme={toggleTheme}
         theme={theme}
         showFilters={showFilters}
@@ -120,34 +133,26 @@ const HomePage: React.FC = () => {
           <input
             type="text"
             placeholder="Search Wishlist..."
-            className={`border rounded-md px-4 py-2 text-sm ${theme === "dark" ? "bg-gray-700 text-white border-gray-500" : "bg-blue-200 border-gray-300"
+            className={`border rounded-md px-4 py-2 text-sm ${theme === "dark"
+                ? "bg-gray-700 text-white border-gray-500"
+                : "bg-blue-200 border-gray-300"
               }`}
             onChange={(e) => setWishlistSearch(e.target.value)}
           />
         </div>
-        <p className={`mt-2 ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>
-          {filteredWishlist.length} {filteredWishlist.length === 1 ? "car" : "cars"} in your wishlist.
-        </p>
-        <div
-          className={`max-h-100 overflow-y-auto rounded-md p-4 shadow-md ${theme === "dark" ? "bg-gray-700 text-white border-gray-500" : "bg-gray-100 text-gray-900 border-gray-300"
-            }`}
-        >
-          {currentWishlistCars.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {currentWishlistCars.map((car: Car) => (
+        {filteredWishlist.length > 0 ? (
+          <div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+              {currentWishlistCars.map((car) => (
                 <CarCard
                   key={car.id}
                   car={car}
-                  isInWishlist={true}
+                  isInWishlist
                   onToggleWishlist={toggleWishlist}
-                  theme={theme} // Pass current theme for dynamic adaptation
+                  theme={theme}
                 />
               ))}
             </div>
-          ) : (
-            <p className="text-center text-gray-500">No cars match your search.</p>
-          )}
-          {filteredWishlist.length > carsPerWishlistPage && (
             <div className="flex justify-center mt-4">
               <Pagination
                 count={Math.ceil(filteredWishlist.length / carsPerWishlistPage)}
@@ -156,11 +161,13 @@ const HomePage: React.FC = () => {
                 color="primary"
               />
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <p className="text-center text-gray-500">No cars in your wishlist.</p>
+        )}
       </div>
 
-      {/* Render Current Cars */}
+      {/* Search Results Section */}
       {isLoading ? (
         <div className="flex justify-center items-center mt-4">
           <div className="spinner-border animate-spin inline-block w-6 h-6 border-t-2 border-b-2 border-blue-500 rounded-full"></div>
@@ -174,12 +181,11 @@ const HomePage: React.FC = () => {
               car={car}
               isInWishlist={wishlist.some((item) => item.id === car.id)}
               onToggleWishlist={toggleWishlist}
-              theme={theme} // Dynamic styling based on the theme
+              theme={theme}
             />
           ))}
         </div>
       )}
-
       <div className="flex justify-center mt-4">
         <Pagination
           count={Math.ceil(carList.length / carsPerPage)}
