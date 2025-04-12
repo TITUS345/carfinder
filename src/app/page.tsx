@@ -1,103 +1,195 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import React, { useState, useEffect } from "react";
+import SearchBar from "@/components/SearchBar/SearchBar";
+import CarCard from "@/components/CarCard/CarCard";
+import { SearchFilters } from "@/types/SearchFilters";
+import { Car } from "@/types/Car";
+import Pagination from "@mui/material/Pagination";
+
+const HomePage: React.FC = () => {
+  const [carList, setCarList] = useState<Car[]>([]);
+  const [wishlist, setWishlist] = useState<Car[]>([]);
+  const [wishlistSearch, setWishlistSearch] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [wishlistPage, setWishlistPage] = useState(1);
+  const [sortBy, setSortBy] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [theme, setTheme] = useState<string>("light");
+  const carsPerPage = 5;
+  const carsPerWishlistPage = 10;
+
+  useEffect(() => {
+    const savedWishlist = localStorage.getItem("wishlist");
+    if (savedWishlist) {
+      setWishlist(JSON.parse(savedWishlist));
+    }
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+      setTheme(savedTheme);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("wishlist", JSON.stringify(wishlist));
+  }, [wishlist]);
+
+  useEffect(() => {
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const handleSearch = async (filters: SearchFilters) => {
+    setIsLoading(true);
+    try {
+      const queryString = new URLSearchParams(filters as any).toString();
+      const response = await fetch(`/api/cars?${queryString}`);
+      const data = await response.json();
+      setCarList(data);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error("Failed to fetch cars:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const toggleWishlist = (car: Car) => {
+    if (wishlist.some((item) => item.id === car.id)) {
+      setWishlist(wishlist.filter((item) => item.id !== car.id));
+    } else {
+      setWishlist([...wishlist, car]);
+    }
+  };
+
+  const sortedWishlist = [...wishlist].sort((a, b) => {
+    switch (sortBy) {
+      case "price":
+        return a.price - b.price;
+      case "brand":
+        return a.brand.localeCompare(b.brand);
+      case "seatingCapacity":
+        return a.seatingCapacity - b.seatingCapacity;
+      default:
+        return 0;
+    }
+  });
+
+  const filteredWishlist = sortedWishlist.filter((car: Car) =>
+    car.brand.toLowerCase().includes(wishlistSearch.toLowerCase())
+  );
+
+  const indexOfLastWishlistCar = wishlistPage * carsPerWishlistPage;
+  const indexOfFirstWishlistCar = indexOfLastWishlistCar - carsPerWishlistPage;
+  const currentWishlistCars = filteredWishlist.slice(
+    indexOfFirstWishlistCar,
+    indexOfLastWishlistCar
+  );
+
+  const indexOfLastCar = currentPage * carsPerPage;
+  const indexOfFirstCar = indexOfLastCar - carsPerPage;
+  const currentCars = carList.slice(indexOfFirstCar, indexOfLastCar);
+
+  const handlePageChange = (event: React.ChangeEvent<unknown>, page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleWishlistPageChange = (event: React.ChangeEvent<unknown>, page: number) => {
+    setWishlistPage(page);
+  };
+
+  const toggleTheme = () => {
+    setTheme(theme === "light" ? "dark" : "light");
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className={`p-4 ${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-gray-900"}`}>
+      <SearchBar
+        onSearch={handleSearch}
+        onSortChange={setSortBy}
+        toggleTheme={toggleTheme}
+        theme={theme}
+        showFilters={showFilters}
+        setShowFilters={setShowFilters}
+      />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* Wishlist Section */}
+      <div className="mt-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Your Wishlist</h2>
+          <input
+            type="text"
+            placeholder="Search Wishlist..."
+            className={`border rounded-md px-4 py-2 text-sm ${theme === "dark" ? "bg-gray-700 text-white border-gray-500" : "bg-blue-200 border-gray-300"
+              }`}
+            onChange={(e) => setWishlistSearch(e.target.value)}
+          />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+        <p className={`mt-2 ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>
+          {filteredWishlist.length} {filteredWishlist.length === 1 ? "car" : "cars"} in your wishlist.
+        </p>
+        <div
+          className={`max-h-100 overflow-y-auto rounded-md p-4 shadow-md ${theme === "dark" ? "bg-gray-700 text-white border-gray-500" : "bg-gray-100 text-gray-900 border-gray-300"
+            }`}
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          {currentWishlistCars.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {currentWishlistCars.map((car: Car) => (
+                <CarCard
+                  key={car.id}
+                  car={car}
+                  isInWishlist={true}
+                  onToggleWishlist={toggleWishlist}
+                  theme={theme} // Pass current theme for dynamic adaptation
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-500">No cars match your search.</p>
+          )}
+          {filteredWishlist.length > carsPerWishlistPage && (
+            <div className="flex justify-center mt-4">
+              <Pagination
+                count={Math.ceil(filteredWishlist.length / carsPerWishlistPage)}
+                page={wishlistPage}
+                onChange={handleWishlistPageChange}
+                color="primary"
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Render Current Cars */}
+      {isLoading ? (
+        <div className="flex justify-center items-center mt-4">
+          <div className="spinner-border animate-spin inline-block w-6 h-6 border-t-2 border-b-2 border-blue-500 rounded-full"></div>
+          <p className="ml-2 text-gray-500">Fetching results, please wait...</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+          {currentCars.map((car: Car) => (
+            <CarCard
+              key={car.id}
+              car={car}
+              isInWishlist={wishlist.some((item) => item.id === car.id)}
+              onToggleWishlist={toggleWishlist}
+              theme={theme} // Dynamic styling based on the theme
+            />
+          ))}
+        </div>
+      )}
+
+      <div className="flex justify-center mt-4">
+        <Pagination
+          count={Math.ceil(carList.length / carsPerPage)}
+          page={currentPage}
+          onChange={handlePageChange}
+          color="primary"
+        />
+      </div>
     </div>
   );
-}
+};
+
+export default HomePage;
