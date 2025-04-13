@@ -31,7 +31,7 @@ const CarCard: React.FC<CarCardProps> = ({ car, isInWishlist, onToggleWishlist, 
                 <Typography
                     variant="h6"
                     component="div"
-                    className={`${theme === "dark" ? "text-white" : "text-gray-900"}`}
+                    className={`${theme === "dark" ? "text-black" : "text-gray-900"}`}
                 >
                     {car.brand}
                 </Typography>
@@ -39,7 +39,7 @@ const CarCard: React.FC<CarCardProps> = ({ car, isInWishlist, onToggleWishlist, 
                 {/* Price */}
                 <Typography
                     variant="body2"
-                    className={`${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}
+                    className={`${theme === "dark" ? "text-gray-500" : "text-gray-700"}`}
                 >
                     Price: ${car.price.toLocaleString()}
                 </Typography>
@@ -47,7 +47,7 @@ const CarCard: React.FC<CarCardProps> = ({ car, isInWishlist, onToggleWishlist, 
                 {/* Fuel Type */}
                 <Typography
                     variant="body2"
-                    className={`${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}
+                    className={`${theme === "dark" ? "text-gray-500" : "text-gray-700"}`}
                 >
                     Fuel Type: {car.fuelType}
                 </Typography>
@@ -55,7 +55,7 @@ const CarCard: React.FC<CarCardProps> = ({ car, isInWishlist, onToggleWishlist, 
                 {/* Seating Capacity */}
                 <Typography
                     variant="body2"
-                    className={`${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}
+                    className={`${theme === "dark" ? "text-gray-600" : "text-gray-500"}`}
                 >
                     Seats: {car.seatingCapacity}
                 </Typography>
@@ -64,10 +64,10 @@ const CarCard: React.FC<CarCardProps> = ({ car, isInWishlist, onToggleWishlist, 
                 <Button
                     variant="contained"
                     className={`mt-2 ${isInWishlist
-                            ? "bg-red-500 hover:bg-red-600 text-white"
-                            : theme === "dark"
-                                ? "bg-gray-600 hover:bg-gray-700 text-white"
-                                : "bg-blue-500 hover:bg-blue-600 text-white"
+                        ? "bg-red-500 hover:bg-red-600 text-white"
+                        : theme === "dark"
+                            ? "bg-gray-600 hover:bg-gray-700 text-white"
+                            : "bg-blue-500 hover:bg-blue-600 text-white"
                         }`}
                     onClick={() => onToggleWishlist(car)}
                 >

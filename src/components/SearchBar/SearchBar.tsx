@@ -5,17 +5,15 @@ import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
 
 interface SearchBarProps {
-    onSearch: (filters: SearchFilters) => void;
-    onSortChange: (sortBy: string) => void; // Callback to update sort criteria
-    toggleTheme: () => void;
-    theme: string; // Light or dark mode
+    onSearch: (filters: SearchFilters) => void; // Function to handle searches
+    toggleTheme: () => void; // Function to toggle between dark and light mode
+    theme: string; // Current theme (light or dark)
     showFilters: boolean; // Tracks visibility of filters
-    setShowFilters: React.Dispatch<React.SetStateAction<boolean>>; // Toggles visibility of filters
+    setShowFilters: React.Dispatch<React.SetStateAction<boolean>>; // Function to toggle filters
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
     onSearch,
-    onSortChange,
     toggleTheme,
     theme,
     showFilters,
@@ -27,11 +25,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
         maxPrice: undefined,
         fuelType: undefined,
     });
-    const [sortCriteria, setSortCriteria] = useState<string>(""); // Local state for sorting
 
-    const handleInputChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-    ) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFilters({ ...filters, [name]: value });
     };
@@ -40,15 +35,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
         onSearch(filters);
     };
 
-    const handleSortChange = (e: React.ChangeEvent<{ value: unknown }>) => {
-        const selectedSort = e.target.value as string;
-        setSortCriteria(selectedSort); // Update local sorting state
-        onSortChange(selectedSort); // Pass sorting criteria to parent
-    };
-
     return (
         <div
-            className={`p-4 rounded-md shadow-md ${theme === "dark" ? "bg-gray-800 text-white" : "bg-gray-100 text-gray-900"
+            className={`p-4 rounded-md shadow-md ${theme === "dark" ? "bg-gray-700 text-white" : "bg-gray-100 text-gray-900"
                 }`}
         >
             {/* Show/Hide Filters Button */}
@@ -61,33 +50,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 {showFilters ? "Hide Filters" : "Show Filters"}
             </Button>
 
-            {/* Sorting Dropdown */}
-            <TextField
-                select
-                label="Sort Wishlist"
-                value={sortCriteria}
-                onChange={handleSortChange}
-                variant="outlined"
-                className="w-full md:w-1/7 mb-4"
-                SelectProps={{
-                    style: theme === "dark"
-                        ? { color: "white", backgroundColor: "#333" }
-                        : {},
-                }}
-                InputLabelProps={{
-                    style: theme === "dark" ? { color: "white" } : {},
-                }}
-            >
-                <MenuItem value="">None</MenuItem>
-                <MenuItem value="price">Price</MenuItem>
-                <MenuItem value="brand">Brand</MenuItem>
-                <MenuItem value="seatingCapacity">Seating Capacity</MenuItem>
-            </TextField>
-
-            {/* Filters Section */}
             {showFilters && (
-                <div className="flex flex-wrap gap-4 items-center">
-                    {/* Filter: Brand */}
+                <div className="flex flex-wrap md:flex-row gap-4 items-center">
+                    {/* Filters Section */}
                     <TextField
                         label="Search by Brand"
                         name="brand"
@@ -96,16 +61,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
                         onChange={handleInputChange}
                         className="w-full md:w-1/8"
                         InputProps={{
-                            style: theme === "dark"
-                                ? { color: "white", backgroundColor: "#333" }
-                                : {},
+                            style: theme === "dark" ? { color: "white" } : {}, // Input text color
                         }}
                         InputLabelProps={{
-                            style: theme === "dark" ? { color: "white" } : {},
+                            style: theme === "dark" ? { color: "white" } : {}, // Placeholder color
                         }}
                     />
-
-                    {/* Filter: Min Price */}
                     <TextField
                         label="Min Price"
                         name="minPrice"
@@ -115,16 +76,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
                         onChange={handleInputChange}
                         className="w-full md:w-1/8"
                         InputProps={{
-                            style: theme === "dark"
-                                ? { color: "white", backgroundColor: "#333" }
-                                : {},
+                            style: theme === "dark" ? { color: "white" } : {}, // Input text color
                         }}
                         InputLabelProps={{
-                            style: theme === "dark" ? { color: "white" } : {},
+                            style: theme === "dark" ? { color: "white" } : {}, // Placeholder color
                         }}
                     />
-
-                    {/* Filter: Max Price */}
                     <TextField
                         label="Max Price"
                         name="maxPrice"
@@ -134,16 +91,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
                         onChange={handleInputChange}
                         className="w-full md:w-1/8"
                         InputProps={{
-                            style: theme === "dark"
-                                ? { color: "white", backgroundColor: "#333" }
-                                : {},
+                            style: theme === "dark" ? { color: "white" } : {}, // Input text color
                         }}
                         InputLabelProps={{
-                            style: theme === "dark" ? { color: "white" } : {},
+                            style: theme === "dark" ? { color: "white" } : {}, // Placeholder color
                         }}
                     />
-
-                    {/* Filter: Fuel Type */}
                     <TextField
                         select
                         label="Fuel Type"
@@ -153,12 +106,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
                         variant="outlined"
                         className="w-full md:w-1/7"
                         SelectProps={{
-                            style: theme === "dark"
-                                ? { color: "white", backgroundColor: "#333" }
-                                : {},
+                            style: theme === "dark" ? { color: "white" } : {}, // Dropdown text color
                         }}
                         InputLabelProps={{
-                            style: theme === "dark" ? { color: "white" } : {},
+                            style: theme === "dark" ? { color: "white" } : {}, // Label color
                         }}
                     >
                         <MenuItem value="">None</MenuItem>
@@ -167,12 +118,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
                         <MenuItem value="Electric">Electric</MenuItem>
                     </TextField>
 
-                    {/* Submit Button */}
+                    {/* Search Button */}
                     <Button
                         variant="contained"
                         color="secondary"
                         onClick={handleFilterSubmit}
-                        className="mt-4"
+                        className="w-3px md:w-1/9"
                     >
                         Search
                     </Button>
@@ -182,7 +133,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                         variant="contained"
                         color="primary"
                         onClick={toggleTheme}
-                        className="mt-4 bg-blue-500 text-white"
+                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 md:ml-auto"
                     >
                         Switch to {theme === "light" ? "Dark" : "Light"} Mode
                     </Button>
