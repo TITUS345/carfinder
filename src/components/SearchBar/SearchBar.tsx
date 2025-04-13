@@ -26,13 +26,28 @@ const SearchBar: React.FC<SearchBarProps> = ({
         fuelType: undefined,
     });
 
+    // Handle changes to input fields
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFilters({ ...filters, [name]: value });
+
+        // Parse numeric inputs for Min Price and Max Price
+        const parsedValue =
+            name === "minPrice" || name === "maxPrice" ? (value ? parseFloat(value) : undefined) : value;
+
+        setFilters({ ...filters, [name]: parsedValue });
     };
 
+    // Handle form submission to pass filters to the parent component
     const handleFilterSubmit = () => {
-        onSearch(filters);
+        // Ensure no undefined values are passed in the filters object
+        const sanitizedFilters: SearchFilters = {
+            brand: filters.brand?.trim() || "",
+            minPrice: filters.minPrice,
+            maxPrice: filters.maxPrice,
+            fuelType: filters.fuelType,
+        };
+
+        onSearch(sanitizedFilters);
     };
 
     return (
